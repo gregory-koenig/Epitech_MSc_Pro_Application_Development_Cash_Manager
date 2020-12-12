@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  cashmanager_api:
+    container_name: cashmanager_api
+    build: ./backend/cashmanager
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      DB_USER: postgres
+      DB_PASS: postgres
+      DB_NAME: cashmanager_dev
+      DB_HOST: cashmanager_db
+      DB_PORT: 5432
+    volumes:
+      - app-volume:/usr/app/data
+    depends_on:
+      - cashmanager_db
+  cashmanager_db:
+    container_name: cashmanager_db
+    image: postgres:alpine
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cashmanager_dev
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+  cashmanager_apk:
+    container_name: cashmanager_apk
+    build: ./frontend/cashmanager
+    restart: always
+    tty: true
+    volumes:
+      - app-volume:/usr/src/data
+volumes:
+  app-volume:
+  pg-data:

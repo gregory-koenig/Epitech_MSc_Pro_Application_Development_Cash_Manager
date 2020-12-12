@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">CashManager</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">Username</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Username must be > 6 characters</string>
+    <string name="invalid_email">Not a valid email</string>
+    <string name="invalid_password">Password must be > 6 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="register_failed">Register failed</string>
+    <string name="login_invalid">Invalid credentials</string>
+    <string name="title_activity_home">MainActivity</string>
+    <string name="title_home">Scanner</string>
+    <string name="title_dashboard">Basket</string>
+    <string name="title_notifications">Account</string>
+    <string name="register">register ?</string>
+    <string name="login">login ?</string>
+    <string name="payButtonText">Pay</string>
+    <string name="payment_failed">Payment failed</string>
+    <string name="payment_success">Payment successful</string>
+</resources>
