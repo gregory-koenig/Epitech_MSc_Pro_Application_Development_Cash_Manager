@@ -1,15 +1,15 @@
 package com.example.cashmanager.ui.basket
 
-import android.opengl.Visibility
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -17,9 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.cashmanager.R
 import com.example.cashmanager.data.model.Product
 import com.example.cashmanager.ui.home.HomeViewModel
+import com.example.cashmanager.ui.payment.PaymentFragment
 import kotlinx.android.synthetic.main.fragment_basket.*
-import java.lang.Math.round
-import kotlin.math.roundToLong
 
 class BasketFragment : Fragment() {
 
@@ -38,22 +37,22 @@ class BasketFragment : Fragment() {
         homeViewModel = viewModel
 
         homeViewModel.products.observe(viewLifecycleOwner, Observer {
-            var total : Float = 0.0F
-            for (product in it){
+            var total: Float = 0.0F
+            for (product in it) {
                 total += (product.price.toFloat() / 100)
             }
             homeViewModel.totalBasket.apply { value = total }
         })
 
         homeViewModel.totalBasket.observe(viewLifecycleOwner, Observer {
-            val validate : Button = root.findViewById(R.id.validateCart)
-            validate.text = String.format("checkout : %.2f€", it )
+            val validate: Button = root.findViewById(R.id.validateCart)
+            validate.text = String.format("checkout : %.2f€", it)
         })
 
 
         if (homeViewModel.products.value == null) {
-            //homeViewModel.products.apply { value = ArrayList<Product>() }
-            productSample()
+            homeViewModel.products.apply { value = ArrayList() }
+            //productSample()
         }
         return root
     }
@@ -68,7 +67,7 @@ class BasketFragment : Fragment() {
         productAdapter.removeQuantity = { productIndex ->
             homeViewModel.removeQuantity(productIndex)
         }
-        productAdapter.removeProductFromBasket = {productIndex ->
+        productAdapter.removeProductFromBasket = { productIndex ->
             homeViewModel.removeProductFromBasket(productIndex)
         }
 
@@ -78,10 +77,18 @@ class BasketFragment : Fragment() {
         val emptyBasketMessage : TextView = view.findViewById(R.id.emptyBasketMessage)
 
         validate.setOnClickListener{
-            val validToast = Toast.makeText(activity?.applicationContext, "Cart validated", Toast.LENGTH_LONG)
-            val invalidToast = Toast.makeText(activity?.applicationContext, "Error during validation of your cart", Toast.LENGTH_LONG)
-            homeViewModel.validateBasket(validToast, invalidToast)
-            productAdapter.update()
+            val validToast = Toast.makeText(view.context, "Cart successfully created", Toast.LENGTH_LONG)
+            val invalidToast = Toast.makeText(view.context, "Cart creation failed", Toast.LENGTH_LONG)
+            homeViewModel.createBasket(validToast, invalidToast)
+            val ft: FragmentTransaction = requireFragmentManager().beginTransaction()
+            val prev = requireFragmentManager().findFragmentByTag("dialog")
+            if (prev != null) {
+                ft.remove(prev)
+            }
+            ft.addToBackStack(null)
+
+            val dialogFragment: DialogFragment = PaymentFragment(productAdapter)
+            dialogFragment.show(ft, "dialog")
         }
 
         homeViewModel.products.observe(viewLifecycleOwner, Observer {
@@ -100,12 +107,4 @@ class BasketFragment : Fragment() {
             adapter = productAdapter
         }
     }
-
-    private fun productSample() {
-        val product: Product = Product(1, "product 1", "this is a desription", 1999, 12, 199, 1)
-        val product2: Product =
-            Product(2, "product 2", "this is a desription", 10099, 233, 1000, 1)
-        homeViewModel.products.apply { value = listOf(product, product2) }
-    }
-
 }

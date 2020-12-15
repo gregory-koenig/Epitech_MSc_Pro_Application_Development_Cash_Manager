@@ -1,15 +1,19 @@
 package com.cashmanager.controller;
 
-import com.cashmanager.model.ChargeRequest;
 import com.cashmanager.model.PaymentIntentRequest;
 import com.cashmanager.services.StripeService;
+import com.cashmanager.services.mapper.ResponseTemplate;
 import com.stripe.exception.StripeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class PaymentController {
@@ -27,22 +31,18 @@ public class PaymentController {
     @Autowired
     private StripeService stripeService;
 
-    @PostMapping("/charge")
-    public String chargeCard(ChargeRequest chargeRequest) throws StripeException {
-        String token = chargeRequest.getStripeToken();
-        int amount = chargeRequest.getAmount();
-        String description = chargeRequest.getDescription();
-        stripeService.chargeNewCard(token, amount, description);
-        return "result";
-    }
-
     @PostMapping("/payment_intents")
-    public String createPaymentIntent(PaymentIntentRequest paymentIntentRequest) throws StripeException {
-        System.out.println("xxxxx -> route Ok");
-        /*amount // paymentMethodTypes[] // currency*/
-        int amount = paymentIntentRequest.getAmount();
-        String paymentMethodTypes = paymentIntentRequest.getPaymentMethodTypes();
-        var secret = stripeService.createPaymentIntent(amount, paymentMethodTypes);
-        return secret;
+    public Object createPaymentIntent(@RequestBody PaymentIntentRequest paymentIntentRequest) throws StripeException {
+        try {
+            Integer amount = paymentIntentRequest.getAmount();
+            String paymentMethodTypes = paymentIntentRequest.getPaymentMethodTypes();
+            var secret = stripeService.createPaymentIntent(amount, paymentMethodTypes);
+            Map<String, String> result = new HashMap<>();
+            result.put("client_secret", secret);
+            return ResponseTemplate.success(result);
+
+        } catch (Exception | Error error) {
+            return ResponseTemplate.badRequest(error.getLocalizedMessage());
+        }
     }
 }

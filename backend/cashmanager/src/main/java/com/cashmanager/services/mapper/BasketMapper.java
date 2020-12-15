@@ -1,6 +1,7 @@
 package com.cashmanager.services.mapper;
 
 import com.cashmanager.model.Basket;
+import com.cashmanager.model.BasketProduct;
 import com.cashmanager.model.User;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +17,8 @@ public class BasketMapper {
 
     result.put("id", basket.getId());
     result.put("status", basket.getStatus().toString());
-    result.put("user", new UserMapper().mapOne(basket.getUser()));
-    result.put("products", basket.getProducts());
+    result.put("products", new BasketProductMapper().mapAll(basket.getProducts()));
+    result.put("createdAt", basket.getCreatedAt());
     return result;
   }
 

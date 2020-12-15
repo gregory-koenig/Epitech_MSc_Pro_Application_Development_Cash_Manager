@@ -25,6 +25,8 @@ public class User {
 
   private String password;
 
+  private Integer points = 0;
+
   @OneToMany(mappedBy = "user")
   private Set<Basket> baskets;
 
@@ -89,6 +91,10 @@ public class User {
   public void setUpdatedAt(Timestamp updatedAt) {
     this.updatedAt = updatedAt;
   }
+
+  public Integer getPoints() { return points; }
+
+  public void setPoints(Integer points) { this.points = points; }
 
   @Override
   public String toString() {

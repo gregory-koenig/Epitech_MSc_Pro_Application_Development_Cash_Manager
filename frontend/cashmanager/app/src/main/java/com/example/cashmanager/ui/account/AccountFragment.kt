@@ -13,8 +13,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.cashmanager.R
+import com.example.cashmanager.ui.basket.ProductAdapter
 import com.example.cashmanager.ui.home.HomeViewModel
+import kotlinx.android.synthetic.main.fragment_account.*
+import kotlinx.android.synthetic.main.fragment_basket.*
 
 class AccountFragment : Fragment() {
 
@@ -36,6 +40,7 @@ class AccountFragment : Fragment() {
         val userEmail: EditText = root.findViewById(R.id.userEmail)
         val userUsername: EditText = root.findViewById(R.id.userUsername)
         val updateAccount: Button = root.findViewById(R.id.updateAccount)
+        val userPoints : TextView = root.findViewById(R.id.userPoints)
 
         userEmail.addTextChangedListener {
             updateAccount.isEnabled = (userEmail.text.toString() != homeViewModel.currentUser.value?.email && userEmail.text.isNotEmpty())
@@ -48,18 +53,36 @@ class AccountFragment : Fragment() {
         updateAccount.setOnClickListener{
             val email : String = userEmail.text.toString()
             val username : String = userUsername.text.toString()
+            val points : Int = homeViewModel.currentUser.value!!.points
             val validToast = Toast.makeText(activity?.applicationContext, "Account successfully updated !", Toast.LENGTH_LONG)
             val invalidToast = Toast.makeText(activity?.applicationContext, "Error during update of your account", Toast.LENGTH_LONG)
-            homeViewModel.updateUser(email, username, validToast, invalidToast)
+            homeViewModel.updateUser(email, username, points, validToast, invalidToast)
         }
 
         homeViewModel.currentUser.observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 userEmail.setText(it.email)
                 userUsername.setText(it.username)
+                userPoints.text = it.points.toString() + " Point(s)"
                 updateAccount.isEnabled = false
             }
         })
+
         return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        //callback des bouttons d'actions du product dans le basket
+        val basketAdapter = BasketAdapter(homeViewModel.baskets, viewLifecycleOwner)
+        //set button listener
+
+        //Update du boutton de validation
+
+        //update des data au recyclerview
+        recyclerviewBaskets.apply {
+            layoutManager = LinearLayoutManager(activity)
+            adapter = basketAdapter
+        }
     }
 }

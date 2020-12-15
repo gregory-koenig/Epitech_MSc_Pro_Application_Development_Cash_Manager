@@ -34,7 +34,7 @@ public class ProductControllerTest {
   @Autowired
   private MockMvc mockMvc;
 
-  private String token = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTYwNjE3MTc0M30.8xRrr3HPlelRMgD816H-ekR5zclbBmDDZy5ODXaxIANCugZhfHxpw-42NamwDZEppwdqDqyu74COGxU7oivmKA";
+  private String token = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VybmFtZSIsImV4cCI6MTYwODY0MjQzNH0.RQ10ci_giFhSwbASc8_-pnNTMZzkry8tV0GKqF2UaRIyEP451SW25lq_sZ2Y9wfEs0JHAHk5R8BXWShs_Ivwlw";
 
 
   @Test

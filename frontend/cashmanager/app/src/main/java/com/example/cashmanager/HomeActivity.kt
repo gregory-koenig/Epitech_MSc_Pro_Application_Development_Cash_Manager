@@ -17,6 +17,8 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.cashmanager.data.api.ApiResponse
 import com.example.cashmanager.data.api.ApiService
 import com.example.cashmanager.data.model.Product
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.Stripe
 import org.w3c.dom.Text
 import retrofit2.Call
 import retrofit2.Callback
@@ -40,5 +42,10 @@ class HomeActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         navView.setupWithNavController(navController)
+
+        PaymentConfiguration.init(
+                applicationContext,
+                "pk_test_51HpDk4BAlay8xPZcppOJ3QAtvMZhGnFddRAvSgza255sP6sUa27p6c1yDWgZHAuXnU5lHeRHIi8PEaa1IRCGRCuA00EDRLISY6"
+        )
     }
 }

@@ -30,14 +30,16 @@ public class BasketController {
   private final ProductRepository productRepository;
   private final BasketProductRepository basketProductRepository;
   private final BasketMapper mapper;
+  private final UserRepository userRepository;
 
   public BasketController(BasketRepository basketRepository,
                           ProductRepository productRepository,
                           BasketProductRepository basketProductRepository,
-                          BasketMapper mapper, UserConfig userConfig) {
+                          BasketMapper mapper, UserConfig userConfig, UserRepository userRepository) {
     this.basketRepository = basketRepository;
     this.productRepository = productRepository;
     this.basketProductRepository = basketProductRepository;
+    this.userRepository = userRepository;
     this.mapper = mapper;
     this.userConfig = userConfig;
   }
@@ -61,18 +63,12 @@ public class BasketController {
     try {
       Basket basket = basketRepository.findById(basketId).get();
       Basket.BasketStatus status = Basket.BasketStatus.valueOf(body.get("status"));
-      System.out.println("status => ");
-      System.out.println(status);
       basket.setStatus(status);
-      System.out.println("before save");
       basketRepository.save(basket);
-      System.out.println("after save");
       Object returned = mapper.mapOne(basket);
       if (status == Basket.BasketStatus.VALIDATED) {
         Set<BasketProduct> products = basketProductRepository.findAllByBasket(basket);
-        System.out.println("basket products");
-        System.out.println(products);
-        updateProductQuantityAndFidelity(products);
+        updateProductQuantityAndFidelity(products, basket.getUser());
       }
       return ResponseTemplate.success(returned);
     } catch (Exception | Error error) {
@@ -124,8 +120,7 @@ public class BasketController {
     }
   }
 
-  private void updateProductQuantityAndFidelity(Set<BasketProduct> basketProducts) {
-    System.out.println("hello ! ");
+  private void updateProductQuantityAndFidelity(Set<BasketProduct> basketProducts, User user) {
     basketProducts.forEach(basketProduct -> {
       System.out.println(basketProduct);
       Product product = basketProduct.getProduct();
@@ -133,9 +128,10 @@ public class BasketController {
       Integer calcQuantity = product.getStockQuantity() - quantity;
       if (calcQuantity < 0)
         calcQuantity = 0;
-      System.out.println("calc quantity =" + calcQuantity.toString());
       product.setStockQuantity(calcQuantity);
+      user.setPoints(user.getPoints() + product.getCashback());
       productRepository.save(product);
+      userRepository.save(user);
       //save les points fidélités du user
     });
   }
