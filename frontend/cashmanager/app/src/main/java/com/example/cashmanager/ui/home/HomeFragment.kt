@@ -27,6 +27,7 @@ class HomeFragment : Fragment() {
         val root = inflater.inflate(R.layout.fragment_home, container, false)
 
         homeViewModel.initUser()
+        homeViewModel.getUserBaskets()
 
         val cardView: CardView = root.findViewById(R.id.productCard)
         val titleCard: TextView = root.findViewById(R.id.titleCard)

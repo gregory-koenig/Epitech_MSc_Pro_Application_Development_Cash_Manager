@@ -25,22 +25,11 @@ public class StripeService {
         Stripe.apiKey = secretKey;
     }
 
-    public Charge chargeNewCard(String token, int amount, String description) throws StripeException {
-        Map<String, Object> chargeParams = new HashMap<String, Object>();
-        chargeParams.put("amount", (int)(amount * 100));
-        chargeParams.put("currency", "EUR");
-        chargeParams.put("source", token);
-        chargeParams.put("description", description);
-        Charge charge = Charge.create(chargeParams);
-        return charge;
-    }
-
     public String createPaymentIntent(int amount, String paymentMethodTypes) throws StripeException {
-        System.out.println("xxxxxx -> amount : " + amount);
         List<Object> paymentMethodTypesArray = new ArrayList<>();
         paymentMethodTypesArray.add(paymentMethodTypes);
         Map<String, Object> intentParams = new HashMap<String, Object>();
-        intentParams.put("amount", (int)(amount * 100));
+        intentParams.put("amount", (int)(amount));
         intentParams.put("currency", "EUR");
         intentParams.put("payment_method_types", paymentMethodTypesArray);
         PaymentIntent paymentIntent = PaymentIntent.create(intentParams);

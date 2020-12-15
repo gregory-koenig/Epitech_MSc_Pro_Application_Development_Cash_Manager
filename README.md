@@ -6,7 +6,7 @@ To get Docker: https://docs.docker.com/get-docker/
 
 In order to PostgreSQL container Docker to work, stop your local PostgreSQL service.
 
-List of containers:
+Containers name:
 - cashmanager_db (*PostgreSQL*)
 - cashmanager_api (*backend*)
 - cashmanager_apk (*frontend*)
@@ -24,4 +24,9 @@ $ docker-compose up
 To run a command in a running container:
 ```shell
 $ docker exec -ti [container_name] bash
+```
+
+To exit a container:
+```shell
+root@[container_id]:~# exit
 ```

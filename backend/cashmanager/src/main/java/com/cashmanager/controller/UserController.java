@@ -49,6 +49,7 @@ public class UserController {
       User returned = userConfig.getUserFromToken(authorization);
       returned.setEmail(user.getEmail());
       returned.setUsername(user.getUsername());
+      returned.setPoints(user.getPoints());
       userRepository.save(returned);
       return ResponseTemplate.success(mapper.mapOne(returned));
     } catch (Exception | Error error) {

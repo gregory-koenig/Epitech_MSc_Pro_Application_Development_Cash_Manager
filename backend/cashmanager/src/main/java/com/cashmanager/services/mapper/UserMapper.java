@@ -15,6 +15,7 @@ public class UserMapper {
     result.put("id", user.getId());
     result.put("username", user.getUsername());
     result.put("email", user.getEmail());
+    result.put("points", user.getPoints());
     return result;
   }
 }

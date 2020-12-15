@@ -23,8 +23,10 @@ class HomeViewModel : ViewModel() {
     val currentUser = MutableLiveData<Account>()
     val product = MutableLiveData<Product>()
     val scanStatusError = MutableLiveData<Boolean>()
-    val products = MutableLiveData<List<Product>>()
+    val products = MutableLiveData<List<Product>>().apply { value = ArrayList() }
     val totalBasket = MutableLiveData<Float>()
+    val baskets = MutableLiveData<List<Basket>>().apply { value = ArrayList() }
+    var currentBasketId : Int = 0
 
     private val apiService = ApiService()
 
@@ -42,8 +44,8 @@ class HomeViewModel : ViewModel() {
             })
     }
 
-    fun updateUser(email: String, username: String, validToast: Toast, invalidToast: Toast) {
-        val updatedAccount: Account = Account(email, username)
+    fun updateUser(email: String, username: String, points : Int,  validToast: Toast, invalidToast: Toast) {
+        val updatedAccount: Account = Account(email, username, points)
         apiService.user.update(updatedAccount)
             .enqueue(object : Callback<Account> {
                 override fun onFailure(call: Call<Account>, t: Throwable) {
@@ -81,13 +83,34 @@ class HomeViewModel : ViewModel() {
             })
     }
 
+    fun getUserBaskets() {
+        apiService.basket.getAllBaskets()
+            .enqueue(object : Callback<List<Basket>> {
+                override fun onFailure(call: Call<List<Basket>>, t: Throwable) {
+                    Log.e("Error : ", t.localizedMessage)
+                }
+
+                override fun onResponse(call: Call<List<Basket>>, response: Response<List<Basket>>) {
+                    Log.i("in response", response.body().toString())
+                    if (response.isSuccessful) {
+                        Log.i("Response OK !!", response.body().toString())
+                        baskets.apply { value = response.body() }
+                        Log.i("baskets = ", baskets.value.toString())
+                    }
+                }
+            })
+    }
+
     fun addProductToBasket() {
         var list: List<Product>? = products.value
         if (list != null) {
             list = list.toMutableList()
-            list.add(product.value!!)
-            Log.i("list = ", list.toString())
-            Log.i("product = ", product.value.toString())
+            val founded = list.find { p -> product.value!!.id == p.id }
+            if (founded != null) {
+                addQuantity(list.indexOf(founded))
+            } else {
+                list.add(product.value!!)
+            }
             products.apply {
                 value = list
             }
@@ -131,15 +154,15 @@ class HomeViewModel : ViewModel() {
         products.apply { value = productsTmp }
     }
 
-    fun validateBasket(validToast: Toast, invalidToast: Toast) {
+    fun validateBasket(status : String, validToast: Toast, invalidToast: Toast) {
         Log.i("update list", products.toString());
         val productsTmp: MutableList<Product>? = products.value?.toMutableList()
         productsTmp?.clear()
-        createBasket(validToast, invalidToast)
+        updateBasket(status, validToast, invalidToast)
         products.apply { value = productsTmp }
     }
 
-    private fun createBasket(validToast: Toast, invalidToast: Toast) {
+    fun createBasket(validToast: Toast, invalidToast: Toast) {
         val body = JSONObject()
         val products_tmp = JSONObject()
         for (p in products.value!!) {
@@ -157,10 +180,42 @@ class HomeViewModel : ViewModel() {
 
                 override fun onResponse(call: Call<Basket>, response: Response<Basket>) {
                     if (response.isSuccessful) {
+                        currentBasketId = response.body()!!.id
                         validToast.show()
                     }
                 }
             })
+    }
+
+    private fun updateBasket(status: String, validToast: Toast, invalidToast: Toast) {
+        val body = JSONObject()
+        body.put("status", status)
+        val jsonObjectString = body.toString()
+        val requestBody = jsonObjectString.toRequestBody("application/json".toMediaTypeOrNull())
+        apiService.basket.updateBasket(currentBasketId, requestBody)
+            .enqueue(object : Callback<Basket> {
+                override fun onFailure(call: Call<Basket>, t: Throwable) {
+                    Log.e("Error on RESPONSE = ", t.localizedMessage)
+                    invalidToast.show()
+                }
+
+                override fun onResponse(call: Call<Basket>, response: Response<Basket>) {
+                    if (response.isSuccessful) {
+                        initUser()
+                        getUserBaskets()
+                        validToast.show()
+                    }
+                }
+            })
+    }
+
+    fun paymentResult(paymentSuccess: Boolean, validToast: Toast?, invalidToast: Toast?) {
+        if (paymentSuccess) {
+            validToast?.show()
+        } else {
+            invalidToast?.show()
+        }
+
     }
 
 }

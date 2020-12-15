@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.cashmanager.R
 import com.example.cashmanager.data.api.ApiService
+import com.example.cashmanager.data.api.AuthenticationInterceptor
 import com.example.cashmanager.data.model.User
 import com.example.cashmanager.ui.login.LoggedInUserView
 import com.example.cashmanager.ui.login.LoginResult
@@ -40,8 +41,7 @@ class RegisterViewModel() : ViewModel() {
                     if (!response.isSuccessful) {
                         _loginResult.value = LoginResult(error = R.string.register_failed)
                     } else {
-                        _loginResult.value =
-                            LoginResult(success = LoggedInUserView(displayName = username))
+                        login(username, password)
                     }
 
                 }
@@ -79,5 +79,33 @@ class RegisterViewModel() : ViewModel() {
         return JSONObject().put("email", email).put("username", username).put("password", password)
             .toString()
             .toRequestBody(mediaType)
+    }
+
+    private fun buildBodyLogin(username: String, password: String): RequestBody {
+        val mediaType = "application/json; charset=utf-8".toMediaType()
+        return JSONObject().put("username", username).put("password", password).toString()
+            .toRequestBody(mediaType)
+    }
+
+    private fun login(username: String, password: String) {
+        apiService.user.login(buildBodyLogin(username, password))
+            .enqueue(object : Callback<User> {
+                override fun onFailure(call: Call<User>, t: Throwable) {
+                    Log.e("Error on RESPONSE = ", t.localizedMessage)
+                    _loginResult.value = LoginResult(error = R.string.login_failed)
+                }
+
+                override fun onResponse(call: Call<User>, response: Response<User>) {
+
+                    if (!response.isSuccessful) {
+                        _loginResult.value = LoginResult(error = R.string.login_invalid)
+                    } else {
+                        AuthenticationInterceptor.token = response.headers().get("Authorization").toString()
+                        _loginResult.value =
+                            LoginResult(success = LoggedInUserView(displayName = username))
+                    }
+
+                }
+            })
     }
 }
